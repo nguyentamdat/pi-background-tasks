@@ -1,8 +1,9 @@
 import { spawn as nodeSpawn, type SpawnOptions } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
-import { createWriteStream, existsSync } from 'node:fs';
-import { mkdir, realpath, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { createWriteStream, existsSync, readFileSync } from 'node:fs';
+import { mkdir, readdir, realpath, readFile, writeFile } from 'node:fs/promises';
+import { homedir } from 'node:os';
+import { isAbsolute, join } from 'node:path';
 import type { Api, Model } from '@earendil-works/pi-ai';
 import type { ExtensionContext } from '@earendil-works/pi-coding-agent';
 import { formatSize } from '@earendil-works/pi-coding-agent';
@@ -770,6 +771,12 @@ export class BackgroundTaskRegistry {
   }
 
   allTasks(): BgTask[] {
+    if (this.runtimeDir) {
+      for (const task of this.tasks.values()) {
+        if (!task.foreign) continue;
+        try { Object.assign(task, JSON.parse(readFileSync(task.metadataAbsPath, 'utf8'))); } catch { /* Metadata may be mid-write. */ }
+      }
+    }
     return [...this.tasks.values()];
   }
 
@@ -777,14 +784,46 @@ export class BackgroundTaskRegistry {
     return snapshot(task);
   }
 
+  private async loadPersistedTasks(dir: RuntimeDir): Promise<void> {
+    const files = await readdir(dir.abs).catch(() => []);
+    for (const file of files) {
+      if (!file.endsWith('.json')) continue;
+      try {
+        const raw = JSON.parse(await readFile(join(dir.abs, file), 'utf8')) as Partial<BgTaskSnapshot>;
+        if (typeof raw.id !== 'string' || typeof raw.status !== 'string' || this.tasks.has(raw.id)) continue;
+        const outputAbsPath = join(dir.abs, `${raw.id}.output`);
+        this.tasks.set(raw.id, {
+          ...raw,
+          name: raw.name ?? raw.id,
+          command: raw.command ?? '',
+          outputPath: join(dir.display, `${raw.id}.output`),
+          outputAbsPath,
+          metadataAbsPath: join(dir.abs, file),
+          cwd: raw.cwd ?? '',
+          startTime: raw.startTime ?? this.now(),
+          bytesWritten: raw.bytesWritten ?? 0,
+          isAgent: raw.isAgent ?? false,
+          notified: raw.notified ?? false,
+          notifyOnCompletion: raw.notifyOnCompletion ?? true,
+          triggerOnCompletion: raw.triggerOnCompletion ?? false,
+          waiters: [],
+          foreign: true,
+        } as BgTask);
+      } catch { /* Ignore partial or unrelated metadata files. */ }
+    }
+  }
+
   async ensureRuntimeDir(ctx: BackgroundTaskContext): Promise<RuntimeDir> {
     if (this.runtimeDir) return this.runtimeDir;
-    const sessionId = sanitizePathSegment(ctx.sessionId ?? `session-${String(process.pid)}`);
-    const runId = `${sessionId}-${String(process.pid)}`;
-    const runtimeDirAbs = join(ctx.cwd, '.pi', 'tasks', runId);
-    const runtimeDirDisplay = join('.pi', 'tasks', runId);
+    const configuredAgentDir = this.env.PI_CODING_AGENT_DIR?.trim();
+    const agentDir = configuredAgentDir
+      ? (isAbsolute(configuredAgentDir) ? configuredAgentDir : join(ctx.cwd, configuredAgentDir))
+      : join(homedir(), '.pi', 'agent');
+    const runtimeDirAbs = join(agentDir, 'tasks');
+    const runtimeDirDisplay = runtimeDirAbs;
     await mkdir(runtimeDirAbs, { recursive: true });
     this.runtimeDir = { abs: runtimeDirAbs, display: runtimeDirDisplay };
+    await this.loadPersistedTasks(this.runtimeDir);
     return this.runtimeDir;
   }
 
@@ -1549,6 +1588,13 @@ export class BackgroundTaskRegistry {
     task.killKind = kind;
     if (reason) task.error = reason;
     this.requestKill(task, 'SIGTERM');
+    if (task.foreign) {
+      task.status = 'killed';
+      task.endTime = this.now();
+      await this.writeMetadata(task);
+      this.onChange();
+      return task;
+    }
     const stopWaitMs = task.managedStopWaitMs ?? this.stopWaitMs;
     const stopped =
       this.platform === 'win32' && task.managedCancel === undefined
@@ -2115,9 +2161,6 @@ export class BackgroundTaskRegistry {
       task.killSignalSent = true;
       return;
     }
-    if (!task.child) {
-      throw new Error(`Task ${task.id} has no child process handle`);
-    }
     if (!task.pid) {
       throw new Error(`Task ${task.id} has no process id`);
     }
@@ -2139,8 +2182,7 @@ export class BackgroundTaskRegistry {
         `process group kill failed: ${error instanceof Error ? error.message : String(error)}`,
       );
     }
-
-    if (!killed) {
+    if (!killed && task.child) {
       try {
         task.child.kill(signal);
         killed = true;

@@ -15,8 +15,9 @@ The runtime owns task identity, shell invocation, process lifecycle, bounded log
 
 - Task statuses are exactly `running`, `completed`, `failed`, and `killed`.
 - Terminal statuses are exactly `completed`, `failed`, and `killed`.
-- Runtime directory: `.pi/tasks/<session-id>-<pid>/` under the project cwd.
+- Runtime directory: `~/.pi/agent/tasks/` on the machine (or `$PI_CODING_AGENT_DIR/tasks/` when configured).
 - Per task: `<task-id>.output` and `<task-id>.json`; some agent modes may add wrapper or attestation files.
+- Every Pi session loads the shared metadata registry; running tasks are owned by their original session and are not killed when another session reloads or exits.
 - In-memory recent retention prunes oldest finished tasks over the limit while preserving running tasks.
 - `resolveTask` accepts exact ids or unambiguous prefixes and fails loudly for empty, unknown, or ambiguous ids.
 

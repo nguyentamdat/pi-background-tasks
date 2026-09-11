@@ -158,6 +158,8 @@ export interface BgTask extends Omit<BgTaskSnapshot, 'name'> {
   managedStopWaitMs?: number | undefined;
   metadataWriteChain?: Promise<void> | undefined;
   waiters: Array<() => void>;
+  /** Task was loaded from the machine-wide registry and is owned by another Pi session. */
+  foreign?: boolean;
 }
 
 export type CompletionDeliveryMode =

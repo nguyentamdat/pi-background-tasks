@@ -491,7 +491,7 @@ export default function backgroundTasksExtension(pi: ExtensionAPI): void {
       statusInterval = undefined;
     }
     try {
-      const running = registry.allTasks().filter((task) => task.status === 'running');
+      const running = registry.allTasks().filter((task) => task.status === 'running' && !task.foreign);
       if (running.length === 0) return;
 
       const failures: string[] = [];
