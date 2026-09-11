@@ -26,7 +26,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:72c53dcc104f9b5efa57e38bcb21a4c3c620d5caf1571af82348f94dcafbe941",
+      "authored_body_sha256": "sha256:d74e15a5d9c67a6602e341a68a08d8ed06edb0769cc114e689d5702ebab2b575",
       "covers_sources": [
         "extensions/anthropic-attribution.ts",
         "src/core/anthropic-attribution-path.ts",
@@ -832,7 +832,7 @@
     "image": "https://raw.githubusercontent.com/ismailsaleekh/pi-background-tasks/main/logo.png",
     "name": "pi-background-tasks",
     "type": "module",
-    "version": "2.4.2"
+    "version": "2.5.0"
   },
   "public_surface_ids": [
     "command:bg",
@@ -902,7 +902,7 @@
         "id": "command:claude-cache",
         "kind": "command",
         "name": "claude-cache",
-        "source": "src/core/anthropic-attribution.ts:1928"
+        "source": "src/core/anthropic-attribution.ts:3026"
       },
       {
         "description": "Start fixed-purpose Fusion reason in the background and return immediately.",
