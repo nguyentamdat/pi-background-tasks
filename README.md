@@ -27,7 +27,7 @@
 | Fact | Value |
 | --- | --- |
 | Package | `pi-background-tasks` |
-| Version | `2.6.1` |
+| Version | `2.6.2` |
 | Node engine | `>=22.19.0` |
 | Pi entrypoints | `./dist/extensions/anthropic-attribution.js`, `./dist/extensions/background-tasks.js` |
 | Package image | [logo.png](https://raw.githubusercontent.com/ismailsaleekh/pi-background-tasks/main/logo.png) |
@@ -376,4 +376,4 @@ Operations are `capabilities`, `run`, `status`, `logs`, and `kill`. This is the 
 
 Keep user-facing claims tied to source. If you change public schemas, command behavior, durability, model routing, or environment variables, update these package-local docs in the same change and run focused checks appropriate to the edit.
 
-For startup work, use `scripts/benchmark-cold-load.mjs` with an owned output/scratch root, explicit `--runtime source|compiled`, and at least 30 fresh-process samples; the exact command and interpretation rules are in [Testing operations](docs/operations/testing.md#cold-load-measurement-discipline). Its “cold” result means an empty JavaScript/Jiti module cache, not a flushed filesystem cache. It is distribution evidence, not a flaky CI threshold. Published Pi entrypoints use precompiled JavaScript; disabled delegate/Fusion/attribution lanes, the dock UI, and attested execution stay outside process-only static startup. Native-Windows and vendor compiled-Bun timing still require their own evidence.
+For startup work, use `scripts/benchmark-cold-load.mjs` with an owned output/scratch root, explicit `--runtime source|compiled`, and at least 30 fresh-process samples; the exact command and interpretation rules are in [Testing operations](docs/operations/testing.md#cold-load-measurement-discipline). Its “cold” result means an empty JavaScript/Jiti module cache, not a flushed filesystem cache. It is distribution evidence, not a flaky CI threshold. Published Pi entrypoints use precompiled JavaScript; disabled delegate/Fusion/attribution lanes, the dock UI, and attested execution stay outside process-only static startup. Load those entrypoints through Pi; `dist/src/**` contains private implementation chunks and is not a set of standalone Node entrypoints. Native-Windows and vendor compiled-Bun timing still require their own evidence.

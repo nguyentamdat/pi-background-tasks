@@ -79,7 +79,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:5555c0344c4bdba65e71575163febe4d672a60a5ff944c260604270ceb4cdc69",
+      "authored_body_sha256": "sha256:d1e5920202ddc1368fa94148ad96906784937084d6ef5a72f1153f8dc3a4374e",
       "covers_sources": [
         "extensions/delegate-child.ts",
         "src/core/delegate/artifacts.ts",
@@ -135,7 +135,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:b3b66442d3fdb151d99c93f2a536f93e85eec6604a074424d34929b0bce7935a",
+      "authored_body_sha256": "sha256:e1fdd8fbce4cb918fb8f361b4c13b1f78fadd455a5a18b22836a6f0b466f4119",
       "covers_sources": [
         "extensions/background-tasks.ts",
         "src/core/config.ts",
@@ -909,7 +909,7 @@
     "image": "https://raw.githubusercontent.com/ismailsaleekh/pi-background-tasks/main/logo.png",
     "name": "pi-background-tasks",
     "type": "module",
-    "version": "2.6.1"
+    "version": "2.6.2"
   },
   "public_surface_ids": [
     "command:bg",

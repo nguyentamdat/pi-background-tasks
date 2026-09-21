@@ -13,7 +13,9 @@ This subsystem owns the extension entrypoint, command/tool registration, footer 
 
 ## Entrypoint and registration
 
-The published `dist/extensions/background-tasks.js` entrypoint is compiled from `extensions/background-tasks.ts`, which re-exports the authoritative `src/extension.ts`. Before creating the registry or registering a surface, the extension strictly parses the shared capability/shortcut configuration. It dynamically imports delegate/Fusion facade registration only for enabled capabilities; the dock component is imported only when an interactive manager is opened. `process` is mandatory and registers:
+The published `dist/extensions/background-tasks.js` entrypoint is compiled from `extensions/background-tasks.ts`, which re-exports the authoritative `src/extension.ts`. Only the ordered paths in `package.json.pi.extensions` and the package-owned child extension paths are supported extension roots. Files under `dist/src/**` are private compiled implementation chunks, not standalone Node entrypoints. Importing one directly from an unrelated natively loaded extension bypasses Pi's Jiti host-module aliases and is unsupported. The packed-package gate instead exercises every public lazy lane through the real package entrypoint with no package-local Pi SDK or TypeBox installation.
+
+Before creating the registry or registering a surface, the extension strictly parses the shared capability/shortcut configuration. It dynamically imports delegate/Fusion facade registration only for enabled capabilities; the dock component is imported only when an interactive manager is opened. `process` is mandatory and registers:
 
 - commands: `/bg`, `/tasks`, `/bg-tasks`, `/bg-clear`, `/bg-update`, `/jobs`, `/logs`, `/kill`;
 - tools: `bg_run`, `bg_status`, `bg_logs`, `bg_kill`;
