@@ -100,6 +100,29 @@ Current smoke builds the runtime and then runs `tsx scripts/smoke.ts`. It create
 
 It performs no inference and spawns no child, so it is safe to run offline and costs nothing. It exits non-zero if any stage would exceed the budget.
 
+### Pi 0.86 transcript regressions
+
+`tests/unit/anthropic-role-progress.test.ts` owns a hard subprocess/SIGKILL deadline for unknown-role conversion, so a synchronous infinite loop cannot hang the test runner. `anthropic-transcript.test.ts` covers legacy-byte preservation, injected host replay, hybrid bases, missing/malformed helpers, malformed system state, tool-result grouping, and pre-network refusal. `anthropic-attribution-lineage.test.ts` covers a compaction summary behind a system checkpoint, signature non-inheritance, and subsequent valid chaining. `parent-transcript.test.ts` pins one effective-prompt capture, prompt-state filtering, sibling-leaf exclusion, and unchanged frozen-transform rejection behavior.
+
+The production-only packed test runs `tests/fixtures/packed-transcript-runtime.mjs` in a separately bounded process. It tests both real gateways, Anthropic prompt/section/tool replay and compaction, plus successful `bg_delegate` and `fusion_reason` launch → fake child → hash-verified `bg_result`. Only inference/child results are faked; the host loader, projection, registry, and artifacts are real. No Pi SDK/TypeBox is installed beside the tarball. It uses the locked development host by default; explicitly select an installed Pi 0.86 host without changing dependencies:
+
+```bash
+PI_BG_TEST_HOST_PACKAGE=/absolute/path/to/@earendil-works/pi-coding-agent \
+  node --import tsx --test tests/package/lazy-packed-missing-module.test.ts
+```
+
+Build `dist/` first and use the isolated environment below. The supplied package identity is checked; a missing/invalid host is an error, not an automatic fallback. This focused host witness is not full support-matrix certification and makes no network/model calls.
+
+### Anthropic interoperability regressions (#32–#35)
+
+`anthropic-attribution-session.test.ts` adapts PR #34's concurrent one-off requests and includes an active supplied parent ID plus malformed-ID controls. `anthropic-attribution-network.test.ts` uses owned loopback sockets to prove real Undici disconnect/retry and post-header cancellation. `anthropic-attribution-retry.test.ts` uses fake fetch and a controlled clock for exact retry counts/backoff, immutable wire identity, middleware/terminal-event counts, in-flight ownership, cancellation/deadline cleanup, safe diagnostics, aggregate/cyclic causes, explicit zero and malformed options, and refusal to replay HTTP responses, middleware failures, or partial streams.
+
+The production-only packed transcript fixture additionally drives one-off/retried calls through both real gateways and the host's `ModelRegistry.streamSimple` API (the public `ModelRuntime.streamSimple` path on legacy hosts, with explicit version assertions). The packed `attribution-host-capabilities.mjs` fixture links actual compiled entrypoints against missing/malformed compat exports: disabled ambient attribution must load without importing its transport; enabled ambient and mandatory child activation must refuse without publishing registrations. Supported controls preserve foreign-provider argument/stream identity. This simulated ESM shim reproduces #35's linking failure but is not native OMP/Windows qualification. Run via `tests/package/lazy-packed-missing-module.test.ts` after building `dist/`, using the explicit installed-host seam and isolation above. No real inference or credentials are used.
+
+### Shell prompt-shape regression (#35 follow-up)
+
+`tests/unit/shell-policy-prompt.test.ts` reproduces OMP 18.3.0's `before_agent_start` shape (no `systemPromptOptions`, `systemPrompt:string[]`) and covers missing/null/legacy options, exact string preservation, empty/frozen arrays, Unicode/commas/line endings, existing embedded blocks, split/unmatched markers, both peer-hook orders, idempotent replacement, structured/forced Pi prompts, and loud malformed-input refusal. The packed transcript fixture invokes the hook **registered by the actual compiled public entrypoint** with OMP-shaped and Pi-shaped events in process-only and full-capability activations, with a UI access trap. It asserts preserved prompt content and repeat behavior, not just successful startup. Existing SDK feature/shell-union tests still drive real Pi prompting, reload, and spawn using the same activation policy. The OMP-shaped fixture is a host-contract witness, not native OMP/Windows certification.
+
 ### Fusion byte-immutability gates
 
 Two unit gates protect Fusion's persisted artifact bytes, which are a frozen format:

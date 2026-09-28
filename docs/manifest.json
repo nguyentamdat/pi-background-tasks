@@ -12,7 +12,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:810591c82ced086e1622be9b037db88c8a667856580895dc90cd5af54c6e2107",
+      "authored_body_sha256": "sha256:59a7ea8f35f82516f59ed154856a62cac8a7ad3bda1f7cd0079b2faeee48cc29",
       "covers_sources": [
         "src/core/context/parent-snapshot.ts",
         "src/core/context/token-budget.ts",
@@ -25,7 +25,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:1668305b87b152b6fc98ba3f7bcf029269d4f042a4b39192232a3cc472fdc2ae",
+      "authored_body_sha256": "sha256:f518bdcaa00962cc467bf2ec07272d9c416f1b9495bf95ae15821d9a52abaafd",
       "covers_sources": [
         "extensions/anthropic-attribution-child.ts",
         "extensions/anthropic-attribution.ts",
@@ -50,7 +50,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:2d05c5c7b510ef46489113efc08158e2dee1eb3c5883456c4ddf23fdc57f87c2",
+      "authored_body_sha256": "sha256:98480d246e890ee3dc1ed98cdb007cbbe016cdba896d700221a06132253393f2",
       "covers_sources": [
         "src/core/common.ts",
         "src/core/registry.ts",
@@ -79,7 +79,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:d1e5920202ddc1368fa94148ad96906784937084d6ef5a72f1153f8dc3a4374e",
+      "authored_body_sha256": "sha256:96961a49b0444b6d7c7470f91eef86c120264ea704d4d61ac7a63e9887365640",
       "covers_sources": [
         "extensions/delegate-child.ts",
         "src/core/delegate/artifacts.ts",
@@ -103,7 +103,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:97f8ae7b3d811704207fc40fc4126ab85d58e9dd86cb59d496291a2313d85463",
+      "authored_body_sha256": "sha256:3210ffce8a17087264157f1ac9c290fd767ea51077b6d0665983407c09815e3e",
       "covers_sources": [
         "extensions/fusion-child.ts",
         "src/core/fusion/artifacts.ts",
@@ -135,7 +135,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:e1fdd8fbce4cb918fb8f361b4c13b1f78fadd455a5a18b22836a6f0b466f4119",
+      "authored_body_sha256": "sha256:5f3b9307c4e159c6e7f0ce52474c98222446dd670bd23826618f7437d7f3b39e",
       "covers_sources": [
         "extensions/background-tasks.ts",
         "src/core/config.ts",
@@ -909,7 +909,7 @@
     "image": "https://raw.githubusercontent.com/ismailsaleekh/pi-background-tasks/main/logo.png",
     "name": "pi-background-tasks",
     "type": "module",
-    "version": "2.6.2"
+    "version": "2.6.8"
   },
   "public_surface_ids": [
     "command:bg",
@@ -990,7 +990,7 @@
         "id": "command:claude-cache",
         "kind": "command",
         "name": "claude-cache",
-        "source": "src/core/anthropic-attribution.ts:3220"
+        "source": "src/core/anthropic-attribution.ts:3579"
       },
       {
         "availability": "feature:fusion",

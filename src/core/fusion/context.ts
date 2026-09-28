@@ -243,12 +243,12 @@ export function buildFusionCanonicalInput(
     workflow: 'reason',
     cwd: ctx.cwd,
     request,
-    system_prompt: ctx.getSystemPrompt(),
+    system_prompt: snapshot.systemPrompt,
     conversation_projection: projected.projection,
     context: {
       kind: 'session_projection',
       policy_id: 'fusion-session-projection-v1',
-      system_prompt: ctx.getSystemPrompt(),
+      system_prompt: snapshot.systemPrompt,
       conversation_projection: projected.projection,
     },
   };

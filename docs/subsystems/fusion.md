@@ -48,6 +48,8 @@ A deferred import failure is bounded, names the failed lane, and is retained for
 
 Reason runs (`/fusion` and `fusion_reason`) receive session-projection canonical input (`pi-background-tasks.fusion-input.v5`). Visible user/assistant text is retained verbatim. Assistant thinking, tool calls, tool-result text, and tool-result images are not forwarded; they become deterministic omission receipts plus a local `context-omission-ledger.json`. User image blocks become marker text, and ledger-only image payloads never enter child prompts. Tool calls exclude the active Fusion leaf and sibling calls from the projected branch.
 
+The shared parent adapter excludes Pi 0.86 `system` prompt/tool-state records before the unchanged visible-conversation transform. It captures the effective system prompt once and reuses that value in both existing reason-envelope fields; historical system deltas never become candidate conversation or tools. Compacted sessions use Pi's current system checkpoint and retain their visible summary normally.
+
 Investigate, research, and validate receive clean-task canonical input: exactly `schema_version`, `workflow`, `cwd`, `request`, and `context`. Clean tasks carry no parent system prompt, no conversation projection, no parent transcript, and no omission ledger. Their request text is the canonical JSON serialization of the structured public arguments and is fully authoritative.
 
 ## Workflow and stage policy

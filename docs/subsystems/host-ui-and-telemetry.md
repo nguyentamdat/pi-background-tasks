@@ -27,7 +27,7 @@ Delegate, Fusion, attested-run, and ambient attribution registrations are indepe
 
 ## Agent-visible shell guidance
 
-A dedicated `before_agent_start` hook adds the activation's actual background-shell executable, dialect, and `-c`/cmd argument shape before the model generates a command. The hook uses an independently replaceable prompt section when the host supports structured sections and a chained, idempotent section on older supported hosts. It preserves guidance added by other background-feature hooks in either registration order.
+A dedicated `before_agent_start` hook adds the activation's actual background-shell executable, dialect, and `-c`/cmd argument shape before the model generates a command. The hook uses an independently replaceable prompt section when the host supports structured sections and a chained, idempotent block on string-only hosts, including when `systemPromptOptions` is absent. For OMP-style `string[]` prompts it preserves array boundaries/peer text and appends or updates one package block without changing the caller's array. It preserves guidance added by other background-feature hooks in either registration order, requires no UI, and is independent of the ambient attribution flag. The complete shape-validation contract is in [Background task runtime](background-task-runtime.md#shell-policy).
 
 An inherited Nu, fish, csh, or unknown shell is explicitly described as `user-non-posix`, with instructions not to assume Bash syntax and remediation to set `PI_BG_POSIX_SHELL=bash` before startup or `/reload`. The guidance contains only resolved launch facts, not the process environment or credentials. The registry receives the same immutable selection; task snapshots and metadata make that match observable.
 

@@ -58,6 +58,8 @@ Projection behavior:
 | tool-result images | ledger-only omission with bytes/hash/mime |
 | unknown blocks | projection failure; no child |
 
+The shared parent snapshot separates Pi 0.86 `system` prompt/tool-state messages from visible conversation. Only the once-captured effective prompt enters `parent_system_prompt`; old section/tool deltas are not conversation and never expand the child's inspect-only tool set.
+
 The assistant message containing the active `bg_delegate` call is excluded as a whole. Therefore sibling tool calls in the same assistant message are not visible to any child launched by that batch.
 
 `directive.text` is stored exactly, hashed, and marked `authority: "explicit_text"`. The child prompt and system prompt state that the directive is authoritative and projected history is untrusted supporting context. Omitted parent tool output cannot be recovered by the child; the child is instructed to say so rather than guess.

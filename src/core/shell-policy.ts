@@ -13,9 +13,17 @@ export const SHELL_POLICY_SECTION = 'pi_background_shell_policy';
 const SHELL_POLICY_OPEN = `<${SHELL_POLICY_SECTION}>`;
 const SHELL_POLICY_CLOSE = `</${SHELL_POLICY_SECTION}>`;
 
-interface MutableStructuredPromptOptions {
-  sections?: Record<string, string> | undefined;
-  forceSystemPrompt?: string | undefined;
+interface ShellPolicyPromptEvent {
+  readonly systemPrompt: unknown;
+  readonly systemPromptOptions?: unknown;
+}
+
+function promptObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function unsupportedPrompt(field: string): Error {
+  return new Error(`pi_bg_shell_prompt_unsupported: invalid ${field}`);
 }
 
 export interface ShellPolicyInitializationOptions {
@@ -25,10 +33,7 @@ export interface ShellPolicyInitializationOptions {
 }
 
 function displayedArgs(policy: ShellPolicySnapshot): string[] {
-  return [
-    ...policy.argvPrefix,
-    policy.dialect === 'cmd' ? '"<command>"' : '<command>',
-  ];
+  return [...policy.argvPrefix, policy.dialect === 'cmd' ? '"<command>"' : '<command>'];
 }
 
 /** Stable, non-secret guidance generated from the same selection used for spawning. */
@@ -87,27 +92,76 @@ export function upsertShellPolicyGuidance(
 }
 
 /**
- * Compose across Pi 0.84's chained string hook and Pi 0.86's structured prompt sections.
- * A pre-existing forced prompt is updated as well because structured sections are opaque
- * while `forceSystemPrompt` is active.
+ * Array prompts are host-owned ordered sections (OMP 18.3.0). Never stringify or
+ * join them. Update the first complete owned block within one element, otherwise
+ * append one dedicated element; retain every other element, including empty ones.
+ */
+function upsertShellPolicySections(
+  parts: readonly unknown[],
+  policy: ShellPolicySnapshot,
+): string[] {
+  const sections: string[] = [];
+  for (const part of parts) {
+    // Iteration visits sparse holes as undefined, unlike Array.every/map.
+    if (typeof part !== 'string') throw unsupportedPrompt('systemPrompt array element');
+    sections.push(part);
+  }
+  const index = sections.findIndex((section) => {
+    const start = section.indexOf(SHELL_POLICY_OPEN);
+    return start >= 0 && section.indexOf(SHELL_POLICY_CLOSE, start + SHELL_POLICY_OPEN.length) >= 0;
+  });
+  const existing = sections[index];
+  if (existing === undefined) sections.push(renderShellPolicyGuidanceBlock(policy));
+  else sections[index] = upsertShellPolicyGuidance(existing, policy);
+  return sections;
+}
+
+/**
+ * Preserve Pi's chained string/structured-section contracts and OMP's string[]
+ * contract. Optional structured state is inspected only for string prompts.
  */
 export function applyShellPolicyGuidance(
-  event: Pick<BeforeAgentStartEvent, 'systemPrompt' | 'systemPromptOptions'>,
+  event: ShellPolicyPromptEvent & { readonly systemPrompt: string },
   policy: ShellPolicySnapshot,
-): BeforeAgentStartEventResult | undefined {
-  const options = event.systemPromptOptions as MutableStructuredPromptOptions;
-  if (
-    typeof options.sections === 'object' &&
-    options.sections !== null &&
-    !Array.isArray(options.sections)
-  ) {
-    options.sections[SHELL_POLICY_SECTION] = shellPolicyGuidance(policy);
-    if (typeof options.forceSystemPrompt === 'string') {
-      options.forceSystemPrompt = upsertShellPolicyGuidance(options.forceSystemPrompt, policy);
+): BeforeAgentStartEventResult | undefined;
+export function applyShellPolicyGuidance(
+  event: ShellPolicyPromptEvent & { readonly systemPrompt: readonly string[] },
+  policy: ShellPolicySnapshot,
+): { systemPrompt: string[] };
+export function applyShellPolicyGuidance(
+  event: ShellPolicyPromptEvent,
+  policy: ShellPolicySnapshot,
+): BeforeAgentStartEventResult | { systemPrompt: string[] } | undefined;
+export function applyShellPolicyGuidance(
+  event: ShellPolicyPromptEvent,
+  policy: ShellPolicySnapshot,
+): BeforeAgentStartEventResult | { systemPrompt: string[] } | undefined {
+  if (!promptObject(event)) throw unsupportedPrompt('before_agent_start event');
+  const prompt = event.systemPrompt;
+  if (Array.isArray(prompt)) return { systemPrompt: upsertShellPolicySections(prompt, policy) };
+  if (typeof prompt !== 'string')
+    throw unsupportedPrompt('systemPrompt (expected string or string[])');
+
+  const options = event.systemPromptOptions;
+  if (options !== undefined && options !== null) {
+    if (!promptObject(options)) throw unsupportedPrompt('systemPromptOptions');
+    const sections = options['sections'];
+    if (sections !== undefined && sections !== null) {
+      if (!promptObject(sections)) throw unsupportedPrompt('systemPromptOptions.sections');
+      const forced = options['forceSystemPrompt'];
+      if (forced !== undefined && typeof forced !== 'string') {
+        throw unsupportedPrompt('systemPromptOptions.forceSystemPrompt');
+      }
+      // Validate before mutating host-owned sections. Preserve the existing Pi
+      // mutation contract, including forced prompts that hide structured sections.
+      sections[SHELL_POLICY_SECTION] = shellPolicyGuidance(policy);
+      if (typeof forced === 'string') {
+        options['forceSystemPrompt'] = upsertShellPolicyGuidance(forced, policy);
+      }
+      return undefined;
     }
-    return undefined;
   }
-  return { systemPrompt: upsertShellPolicyGuidance(event.systemPrompt, policy) };
+  return { systemPrompt: upsertShellPolicyGuidance(prompt, policy) };
 }
 
 export function createShellPolicyGuidanceHandler(policy: ResolvedShellPolicy) {

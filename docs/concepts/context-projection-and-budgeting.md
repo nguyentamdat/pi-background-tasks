@@ -33,7 +33,9 @@ Each omitted event records source ordinal, block ordinal, kind, payload byte len
 
 `parent-snapshot.ts` adapts Pi `SessionManager` entries into LLM messages. Tool callers can exclude the active assistant leaf that contains the in-flight tool call; this prevents the child from seeing its own request and sibling calls as completed parent history. Commands do not exclude a leaf.
 
-Callers must snapshot once and complete downstream launch/admission from that frozen snapshot. Re-reading the parent session during launch would allow seed drift.
+Pi 0.86 stores prompt sections and tool loadouts as `system` messages, including a leading checkpoint after compaction. The adapter removes only that known prompt-state role before `convertToLlm()` and captures `ctx.getSystemPrompt()` exactly once in the same synchronous snapshot. Delegate and Fusion keep this effective prompt in their existing envelope fields; historical prompt patches and tool declarations are not forwarded as conversation or granted child tools. Conversation ordinals/accounting refer to the filtered conversation sequence. The frozen v2 transform is unchanged and still rejects unknown roles/blocks; its pre-0.86 golden bytes are not regenerated.
+
+Callers must snapshot once and complete downstream launch/admission from that frozen snapshot, including using its captured system prompt. Re-reading the parent session or prompt during launch would allow seed drift.
 
 ## Reason input vs clean input
 

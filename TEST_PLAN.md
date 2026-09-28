@@ -133,6 +133,29 @@ SDK/RPC/scripted-provider/package/compatibility coverage asserts exactly four to
 | Shared architecture/API/runtime/operations docs | `docs/api`, `docs/concepts`, `docs/subsystems`, `docs/reference`, `docs/operations` | docs focused |  |  |  |  |  |  | The active docs engine validates frontmatter, package-local links/reference links, INDEX reachability, exact behavioral source ownership, generated runtime contracts, deterministic generated regions, and manifest freshness. Semantic receipt state is reported by default and enforced only by the optional strict attestation command. Unsupported extraction and legacy placeholders fail closed. |
 | Package maintenance version/tag wording | `PUBLISHING.md`, `docs/operations/releasing.md` | docs focused |  |  |  |  |  |  | Release commands derive `VERSION` from `package.json`; observed git tags stop at `v0.6.0`, so git install/tag certification is separate from npm publishing and no nonexistent v1 tag is advertised. |
 
+## Pi 0.86 transcript regression acceptance
+
+- Target Anthropic requests replay effective prompt text, named section changes/removals, and current tool additions/removals/redefinitions through host-injected helpers in both packed ambient and child gateways.
+- Legacy Context bytes remain unchanged; hybrid legacy bases precede transcript deltas. Missing helpers or malformed system/helper state fail before middleware or fetch. Unknown message roles cannot loop or disappear (external subprocess deadline).
+- System checkpoints are removed before compaction/signature checks; compaction starts a non-inheriting epoch and subsequent valid turns chain without resurrecting old signatures.
+- Delegate and Fusion reason capture one effective prompt, exclude known system state and the active/sibling tool leaf from visible conversation, and retain the unchanged v2 ledger/golden contracts.
+- Production-only packed public launch → fake child → verified result succeeds against the locked host and an explicitly supplied installed Pi 0.86 host (`PI_BG_TEST_HOST_PACKAGE`), with no private Pi SDK/TypeBox or inference/network calls. This is a focused witness, not an expanded peer-range claim.
+
+## Anthropic interoperability acceptance (#32–#35)
+
+- Omitted/undefined routing IDs mint one request-local UUID; overlapping one-offs and a supplied parent ID remain independent. Headers/metadata agree. Supplied malformed IDs fail before fetch. Contributor: LiangRui He, #33 / PR #34.
+- Connection-only retries preserve one identity/body/header set, one payload middleware pass, and one in-flight reservation. Defaults/explicit limits, exponential cap/jitter, bounded causes/aggregates, safe diagnostics, cancellation during fetch/backoff, per-attempt pre-header deadlines with actual fetch abort/settlement before retry, timer/listener cleanup, exhaustion/recovery, and strict terminal event counts are exercised offline.
+- No transport retry for HTTP responses, permanent/unknown errors, middleware exceptions, partial content, or malformed SSE; failed attempts cannot anchor lineage. Non-target forwarding retains host behavior and unmodified options.
+- Packed ambient and child gateways plus the host `ModelRegistry.streamSimple` route successfully handle anonymous/retried requests without package-local Pi SDK copies.
+- A simulated host shim with no `anthropicMessagesApi` can link/activate the packed ambient gateway with attribution disabled and does not load the transport. Enabled ambient and mandatory child activation refuse missing/malformed capabilities before registrations; malformed factory results fail on forwarding. Native OMP qualification remains separate.
+
+## Shell prompt-shape acceptance (#35 follow-up)
+
+- Missing/null `systemPromptOptions` is valid for string/array prompt hosts; the hook cannot crash merely by reading `.sections`.
+- Ordered string arrays remain arrays: preserve all peer elements/bytes, empty elements, and order; never comma-join, stringify, mutate the input, or combine marker fragments across elements. Update a complete existing package block within its element or append one dedicated element; repeated invocation is idempotent.
+- Pi string/structured-section/forced-prompt behavior and other extensions' guidance remain intact in either hook order. Malformed prompt values (including sparse arrays) and malformed structured fields fail loudly before prompt mutation.
+- The packed public entrypoint's registered hook is exercised with OMP-shaped events in full/process-only configurations without UI, plus legacy string and modern Pi-section controls. Existing real SDK feature/shell union proves prompting, reload, and actual spawn agreement. Native OMP/Windows retest remains separate.
+
 ## Residual hardening coverage
 
 Lane A residual hardening is now covered by automated tests. No remaining hardening-only gaps are intentionally left open in this plan. Future feature work should add new rows instead of weakening these gates.
