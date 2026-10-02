@@ -17,7 +17,7 @@
 - **Run long work without blocking**: start named shell jobs, keep talking to Pi, and get durable completion notifications when they finish.
 - **Delegate context-aware investigation**: launch one route-pinned, inspect-only child Pi agent seeded with a frozen projection of the current conversation, then retrieve a hash-verified result.
 - **Combine model perspectives through fixed-purpose Fusion**: run three candidate children, blind evaluation, optional bounded evaluator repair, and merger for reasoning, investigation, targeted URL research, or validation review.
-- **Keep Anthropic subscription traffic attributed and compatible**: by default, apply the package-owned Claude Code OAuth attribution, cache policy, and exact-match prompt sanitization to parent Anthropic routes without an external sanitizer dependency; isolated package children retain mandatory attribution even when ambient parent attribution is disabled.
+- **Keep Anthropic subscription traffic attributed and compatible**: by default, apply the package-owned Claude Code OAuth attribution, cache policy, and SPS-derived line-start prompt sanitization to parent Anthropic routes without an external sanitizer dependency; isolated package children retain mandatory attribution even when ambient parent attribution is disabled.
 
 <p align="center">
   <img src="docs/assets/architecture.svg" alt="Architecture diagram showing Pi session, background task registry, delegated child agent, and Fusion candidate/evaluator/merger flow" width="760">
@@ -27,7 +27,7 @@
 | Fact | Value |
 | --- | --- |
 | Package | `pi-background-tasks` |
-| Version | `2.6.8` |
+| Version | `2.6.9` |
 | Node engine | `>=22.19.0` |
 | Pi entrypoints | `./dist/extensions/anthropic-attribution.js`, `./dist/extensions/background-tasks.js` |
 | Package image | [logo.png](https://raw.githubusercontent.com/ismailsaleekh/pi-background-tasks/main/logo.png) |
@@ -83,7 +83,7 @@ Full owner map and generated contracts live in [docs/INDEX.md](docs/INDEX.md).
 | Ask a second agent to inspect the repo with the current conversation as context | `bg_delegate` starts one read/search/list child, isolated from ambient extensions by default; `bg_result` verifies the committed result before returning it. |
 | Compare model perspectives without exposing arbitrary parent context | Fusion children receive only the workflow input and fixed tool policy; no silent route substitution or fallback is used on delegate/Fusion paths. |
 | Produce local evidence for a direct Pi run | `bg_run_pi_attested` records local same-user-writable artifacts and hashes after a successful structured child Pi task. |
-| Use Anthropic subscription OAuth consistently | The default ambient provider applies attribution and exact-match sanitization; `/claude-cache` shows or changes session cache retention. Isolated package-owned Anthropic children always use the mandatory child entrypoint. |
+| Use Anthropic subscription OAuth consistently | The default ambient provider applies attribution and SPS-derived line-start sanitization; `/claude-cache` shows or changes session cache retention. Isolated package-owned Anthropic children always use the mandatory child entrypoint. |
 
 ## Install
 

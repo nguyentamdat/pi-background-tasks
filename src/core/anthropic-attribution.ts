@@ -98,13 +98,19 @@ const COMPACTION_SUMMARY_PREFIX =
   'The conversation history before this point was compacted into the following summary:';
 
 // Sanitization behavior derived from the MIT-licensed ravshansbox/pi-anthropic-sps
-// extension at commit 17409b5615f0ec0625776bc5434f92f2c55e3fd0. Keep exact-match
-// semantics and all known Pi prompt variants; unrelated system text is preserved.
-const ANTHROPIC_SYSTEM_PROMPT_BAD_LINES = new Set([
-  '- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)',
-  '- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md), environment variables (docs/environment-variables.md)',
+// extension at commit 3a27cb3f8a2ddf62ee6219357c09a24e33e47cfc. Keep its exact
+// line-start prefix semantics: whole lines beginning with a prefix are removed and
+// all other system text is preserved. These rules must remain a superset of every
+// SPS release, because the transport rejects later before_provider_request system
+// changes; the prefixes also cover every exact line of the earlier 17409b5 rules.
+const ANTHROPIC_SYSTEM_PROMPT_BAD_LINE_PREFIXES = [
+  '- When asked about: extensions (docs/extensions.md, examples/extensions/)',
   '- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing',
-]);
+] as const;
+
+function isAnthropicSystemPromptBadLine(line: string): boolean {
+  return ANTHROPIC_SYSTEM_PROMPT_BAD_LINE_PREFIXES.some((prefix) => line.startsWith(prefix));
+}
 
 type JsonObject = Record<string, unknown>;
 export type CacheRetention = 'none' | 'short' | 'long';
@@ -346,6 +352,11 @@ const CLAUDE_CODE_MODEL_POLICIES: Record<string, ClaudeCodeModelPolicy> = Object
   ),
   'claude-sonnet-5': claudeCode200KSubscriptionPolicy(
     'claude-sonnet-5',
+    CLAUDE_CODE_ADAPTIVE_200K_BETA,
+    'adaptive-effort',
+  ),
+  'claude-sonnet-5-5': claudeCode200KSubscriptionPolicy(
+    'claude-sonnet-5-5',
     CLAUDE_CODE_ADAPTIVE_200K_BETA,
     'adaptive-effort',
   ),
@@ -907,7 +918,7 @@ function cloneBlockWithCacheControl(
 function stripAnthropicSystemPromptBadLines(text: string): string {
   return text
     .split('\n')
-    .filter((line) => !ANTHROPIC_SYSTEM_PROMPT_BAD_LINES.has(line))
+    .filter((line) => !isAnthropicSystemPromptBadLine(line))
     .join('\n');
 }
 
@@ -2252,6 +2263,27 @@ interface PreparedAnthropicLineage {
   readonly details: Omit<AnthropicLineageDetails, 'response_id' | 'assistant_content_sha256'>;
 }
 
+// Lineage facts authorized before optional payload middleware runs. Middleware may
+// observe the attributed payload but must leave every one of these unchanged.
+const MIDDLEWARE_PROTECTED_LINEAGE_FIELDS = [
+  'previous_message_id',
+  'conversation_static_sha256',
+  'request_message_count',
+  'request_messages_sha256',
+  'cache_profile_sha256',
+  'cache_retention',
+  'compaction_boundary_sha256',
+  'signature_epoch_sha256',
+  'signature_epoch_inherits_prior',
+] as const satisfies ReadonlyArray<keyof PreparedAnthropicLineage['details']>;
+
+function changedMiddlewareProtectedLineageFields(
+  authorized: PreparedAnthropicLineage['details'],
+  final: PreparedAnthropicLineage['details'],
+): string[] {
+  return MIDDLEWARE_PROTECTED_LINEAGE_FIELDS.filter((field) => authorized[field] !== final[field]);
+}
+
 function requestMessagesFromPayload(payload: JsonObject): JsonObject[] {
   const messages = payload['messages'];
   if (!Array.isArray(messages) || messages.some((message) => !isPlainObject(message))) {
@@ -3136,25 +3168,13 @@ export function streamAnthropicViaBetaMessages(
         payload: params,
         signatureEpoch: request.signatureEpoch,
       });
-      if (
-        preparedLineage.details.previous_message_id !== provisionalLineage.previous_message_id ||
-        preparedLineage.details.conversation_static_sha256 !==
-          provisionalLineage.conversation_static_sha256 ||
-        preparedLineage.details.request_message_count !==
-          provisionalLineage.request_message_count ||
-        preparedLineage.details.request_messages_sha256 !==
-          provisionalLineage.request_messages_sha256 ||
-        preparedLineage.details.cache_profile_sha256 !== provisionalLineage.cache_profile_sha256 ||
-        preparedLineage.details.cache_retention !== provisionalLineage.cache_retention ||
-        preparedLineage.details.compaction_boundary_sha256 !==
-          provisionalLineage.compaction_boundary_sha256 ||
-        preparedLineage.details.signature_epoch_sha256 !==
-          provisionalLineage.signature_epoch_sha256 ||
-        preparedLineage.details.signature_epoch_inherits_prior !==
-          provisionalLineage.signature_epoch_inherits_prior
-      ) {
+      const middlewareChangedLineageFields = changedMiddlewareProtectedLineageFields(
+        provisionalLineage,
+        preparedLineage.details,
+      );
+      if (middlewareChangedLineageFields.length > 0) {
         throw new Error(
-          'Anthropic request/cache lineage changed during before_provider_request transforms',
+          `Anthropic request/cache lineage changed during before_provider_request transforms (${middlewareChangedLineageFields.join(', ')}); payload middleware must not alter the attributed system prompt, tools, messages, cache retention, or compaction boundary`,
         );
       }
       if (policy.supportsCacheDiagnostics) {

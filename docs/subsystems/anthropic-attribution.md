@@ -9,7 +9,7 @@ covers_sources: [extensions/anthropic-attribution-child.ts, extensions/anthropic
 ---
 # Anthropic attribution subsystem
 
-This subsystem owns the package-wide Anthropic subscription attribution provider, exact-match system-prompt sanitization, cache-retention command, the feature-aware ambient parent entrypoint, and the distinct always-on extension path shared by isolated child Pi processes.
+This subsystem owns the package-wide Anthropic subscription attribution provider, SPS-derived line-start system-prompt sanitization, cache-retention command, the feature-aware ambient parent entrypoint, and the distinct always-on extension path shared by isolated child Pi processes.
 
 ## Global package behavior
 
@@ -27,7 +27,7 @@ For Anthropic sessions it registers the package-owned `anthropic` provider trans
 
 - subscription OAuth token transport only; metered Anthropic credentials are refused, the bearer token is sent only to the exact official Anthropic HTTPS origin, and HTTP redirects are disabled;
 - Claude Code session, account, device, beta, user-agent, and system-identity attribution;
-- model-specific fixed/adaptive thinking policy;
+- model-specific fixed/adaptive thinking policy from an explicit per-model table: Claude 3.x, 4.0–4.5 Sonnet/Opus, and Haiku 4.5 use fixed budgets; Opus 4.6–4.8, Sonnet 4.6, Opus 5, Opus 5.5, Sonnet 5, Sonnet 5.5, and Fable 5 use adaptive effort with the adaptive 200K beta profile; Fable 5.1 additionally enforces thinking binding and cache diagnostics. An unlisted model ID fails loudly instead of borrowing a neighbouring profile;
 - the conservative 200K subscription context policy;
 - provenance-aware cross-provider history projection and Fable 5.1 thinking binding;
 - system, final-tool, and final-conversation cache surfaces;
@@ -66,9 +66,11 @@ Fable 5.1 always sends `thinking-binding-controls-2026-08-01` with prefix mismat
 
 ## Sanitization
 
-The package has no runtime dependency on `@ravshansbox/pi-anthropic-sps`. Its three reviewed exact-match prompt-line rules are implemented locally in `src/core/anthropic-attribution.ts`, with the upstream MIT notice retained in `THIRD_PARTY_NOTICES.md`.
+The package has no runtime dependency on `@ravshansbox/pi-anthropic-sps`. Its two reviewed line-start prefix rules, from upstream commit `3a27cb3`, are implemented locally in `src/core/anthropic-attribution.ts`, with the upstream MIT notice retained in `THIRD_PARTY_NOTICES.md`.
 
-Only complete matching lines are removed. Other system text, non-text blocks, custom block fields, and valid cache controls are preserved. The rules cover both Pi documentation-list variants—with and without `environment-variables.md`—plus the cross-reference instruction line.
+A system-text line is removed only when it begins with one of those prefixes: Pi's documentation-list line (`- When asked about: extensions (docs/extensions.md, examples/extensions/)…`) or the cross-reference instruction line. This covers every observed documentation-list variant—without `environment-variables.md`, with it, and Pi 0.99's variant that appends `MCP servers (docs/mcp.md)`—plus later suffix-only additions. Indented lines, mid-line matches, and all other system text, non-text blocks, custom block fields, and valid cache controls are preserved. Because every exact line of the earlier `17409b5` rules starts with one of these prefixes, pre-0.99 prompts sanitize byte-identically.
+
+The local rules must remain a superset of the upstream SPS release. Loading SPS beside this package is redundant but harmless while they agree: its `before_provider_request` hook then finds nothing to remove. If an independent hook still removes or rewrites system text, it changes the already-authorized system lineage, and the transport refuses before network with `Anthropic request/cache lineage changed during before_provider_request transforms (<fields>)`; that guard is never relaxed. When sanitized system text changes for an existing conversation, such as the first Pi 0.99 turn after upgrading, the conversation-static hash differs and the lane starts one non-inheriting signature epoch; old receipts cannot authorize replay under the changed prefix, so no projection-version bump is required.
 
 ## Duplicate-owner protocol
 

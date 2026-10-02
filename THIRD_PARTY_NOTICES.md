@@ -2,10 +2,11 @@
 
 ## Anthropic system-prompt sanitization rules
 
-The exact-match Anthropic system-prompt sanitization rules in
+The line-start prefix Anthropic system-prompt sanitization rules in
 `src/core/anthropic-attribution.ts` are derived from
 [`ravshansbox/pi-anthropic-sps`](https://github.com/ravshansbox/pi-anthropic-sps)
-at commit `17409b5615f0ec0625776bc5434f92f2c55e3fd0`.
+at commit `3a27cb3f8a2ddf62ee6219357c09a24e33e47cfc` (earlier exact-match rules
+came from commit `17409b5615f0ec0625776bc5434f92f2c55e3fd0`).
 
 Copyright (c) 2026 Ravshan
 

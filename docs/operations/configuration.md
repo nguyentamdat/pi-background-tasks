@@ -124,7 +124,7 @@ The account loader reads `userID` plus `oauthAccount.accountUuid` without writin
 | `/claude-cache status` | Show the effective cache-retention policy for the current session. |
 | `/claude-cache short\|long\|default` | Store or clear a branch-local session override. |
 
-Invalid retention values and malformed persisted overrides fail loudly. The extension also removes only the three reviewed exact-match Pi system-prompt lines rejected by Anthropic; it has no external sanitizer dependency. See [Anthropic attribution](../subsystems/anthropic-attribution.md) and [`/claude-cache`](../commands/claude-cache.md).
+Invalid retention values and malformed persisted overrides fail loudly. The extension also removes only whole Pi system-prompt lines that begin with the two reviewed SPS-derived prefixes rejected by Anthropic (including Pi 0.99’s MCP documentation-list variant); it has no external sanitizer dependency, so a separately installed `pi-anthropic-sps` is redundant. See [Anthropic attribution](../subsystems/anthropic-attribution.md) and [`/claude-cache`](../commands/claude-cache.md).
 
 ## Fusion model configuration
 

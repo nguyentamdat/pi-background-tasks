@@ -291,7 +291,7 @@ export function resolveFusionChildExtensionPath(
 
 /**
  * Provider whose isolated children require the package-owned attribution and
- * exact-match system-prompt sanitization extension.
+ * SPS-derived line-start system-prompt sanitization extension.
  */
 export const FUSION_SANITIZED_PROVIDER = 'anthropic';
 
