@@ -21,7 +21,9 @@ Before creating the registry or registering a surface, the extension strictly pa
 - tools: `bg_run`, `bg_status`, `bg_logs`, `bg_kill`;
 - shortcut: the selected dock key (`shift+down`, `ctrl+alt+b`, or none for `off`) plus unconditional `ctrl+alt+c`;
 - renderer: `background-task-notification`;
-- the task UI and EventBus service.
+- the task UI, the EventBus v1 service, and the optional [host interface](../api/eventbus-host-v1.md) service.
+
+The host interface shares this activation's registry and terminal seen set (`/bg-clear`, dock detail views and host `mark_seen` all mark the same set), is invalidated from the registry change callback and seen-state changes, and becomes ready after the first `session_start` supplies the session context. Its verified result reader is a deferred lane imported only on the first terminal delegate/Fusion result read.
 
 Delegate, Fusion, attested-run, and ambient attribution registrations are independently selected by `PI_BG_FEATURES`. `bg_result` is derived and registered once iff delegate or Fusion is enabled. Disabled facade/attribution modules are absent from the process-only static startup graph rather than merely inactive. Active-tool cleanup is delegated to Pi's registration rebuild: a stale package name with no current definition is dropped, while an active definition from another extension remains active even when it uses a disabled package capability name such as `bg_delegate` or the retired `fusion_brainstorm`. The package does not perform name-wide subtraction. The default selection preserves the complete historical surface. Capability flags alone make no startup-performance claim.
 
@@ -78,7 +80,7 @@ The host UI displays telemetry only from task snapshots: context, model, token t
 
 ## Shutdown
 
-On session shutdown, one early synchronous lifecycle fence permanently closes the activation. Only `reason:"reload"` may first detach admission-committed `surviveReload:true`, `isAgent:false` ordinary executions; detachment removes the old host adapter before any await while preserving logical publication and notification state. The same call stack then closes admissions, aborts admission-owned cancellation scopes, closes registry publication and the EventBus service, clears pending retry/status handles, suppresses old-host notifications, closes every enabled Fusion/delegate/result lazy lane, aborts Fusion controllers, and aborts delegate preparation. The entrypoint registers this shared fence before any facade asynchronous cleanup, so sequential Pi dispatch cannot pause with another old lane still open. Later handlers drain workflow/preparation/admission-owned subprocess, file, and managed cleanup; kill every remaining registry-owned task with the specific lifecycle reason; and report cleanup failures through the UI when possible. Preflight that crosses closure cannot insert, spawn, or return EventBus success.
+On session shutdown, one early synchronous lifecycle fence permanently closes the activation. Only `reason:"reload"` may first detach admission-committed `surviveReload:true`, `isAgent:false` ordinary executions; detachment removes the old host adapter before any await while preserving logical publication and notification state. The same call stack then closes admissions, aborts admission-owned cancellation scopes, closes registry publication, the EventBus service and the host interface service (which removes its request listener, disposes leases and publishes one `closed` change frame), clears pending retry/status handles, suppresses old-host notifications, closes every enabled Fusion/delegate/result lazy lane including the host result reader, aborts Fusion controllers, and aborts delegate preparation. The entrypoint registers this shared fence before any facade asynchronous cleanup, so sequential Pi dispatch cannot pause with another old lane still open. Later handlers drain workflow/preparation/admission-owned subprocess, file, and managed cleanup; kill every remaining registry-owned task with the specific lifecycle reason; and report cleanup failures through the UI when possible. Preflight that crosses closure cannot insert, spawn, or return EventBus success.
 
 The first fresh `session_start` callback synchronously claims the exact `(process.pid, session id, canonical cwd)` slot, imports/durably audits the same task records, commits the fresh adapter, then allows existing UI/status/update setup. Completion during the gap queues for that adapter. Status, logs, kill, commands, and dock therefore use the same id/PID/path/nonce/execution after reload. A malformed new activation or removed extension cannot steal the owner; its fixed handoff deadline cleans up.
 
@@ -91,6 +93,7 @@ Shutdown terminal metadata and task waiters remain truthful even when old-activa
 - [`/bg-clear`](../commands/bg-clear.md)
 - [`/bg-update`](../commands/bg-update.md)
 - [Completion delivery](../concepts/completion-delivery.md)
+- [Host interface EventBus API v1](../api/eventbus-host-v1.md)
 - [Background task runtime](background-task-runtime.md)
 
 ## Source ownership/reference

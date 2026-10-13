@@ -1,6 +1,18 @@
 {
   "attestation_state": [
     {
+      "authored_body_sha256": "sha256:ec2c991976059e10c77e67e77c306d34818bf38993bca11bc692ec8d2e82ffcf",
+      "covers_sources": [
+        "src/core/host-api.ts",
+        "src/core/host-protocol.ts",
+        "src/core/host-results.ts"
+      ],
+      "doc_id": "api/eventbus-host-v1",
+      "rel": "docs/api/eventbus-host-v1.md",
+      "required": true,
+      "state": "missing"
+    },
+    {
       "authored_body_sha256": "sha256:d71aace12a6d092e963a2d99915f94d45c34c4f93e3ce936837dc6182dc1d6d3",
       "covers_sources": [
         "src/core/extension-api.ts"
@@ -79,7 +91,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:96961a49b0444b6d7c7470f91eef86c120264ea704d4d61ac7a63e9887365640",
+      "authored_body_sha256": "sha256:c0575532208544cb5a669c79d8f7d7491e1fa84f23cec71601090104052bde5e",
       "covers_sources": [
         "extensions/delegate-child.ts",
         "src/core/delegate/artifacts.ts",
@@ -135,7 +147,7 @@
       "state": "stale-authored-prose"
     },
     {
-      "authored_body_sha256": "sha256:5f3b9307c4e159c6e7f0ce52474c98222446dd670bd23826618f7437d7f3b39e",
+      "authored_body_sha256": "sha256:5ec02b307087f2598fe2020200b578520bdae2e90a5e863b93975a226918577f",
       "covers_sources": [
         "extensions/background-tasks.ts",
         "src/core/config.ts",
@@ -185,6 +197,7 @@
     "command:kill",
     "command:logs",
     "command:tasks",
+    "eventbus:background-task-host-v1",
     "eventbus:background-task-v1",
     "renderer:background-task-notification",
     "renderer:fusion-result",
@@ -215,6 +228,21 @@
       "rel": "docs/INDEX.md",
       "review_policy": "contract",
       "stability": "stable"
+    },
+    "api/eventbus-host-v1": {
+      "audience": "maintainer",
+      "covers_sources": [
+        "src/core/host-api.ts",
+        "src/core/host-protocol.ts",
+        "src/core/host-results.ts"
+      ],
+      "covers_surfaces": [
+        "eventbus:background-task-host-v1"
+      ],
+      "mode": "mixed",
+      "rel": "docs/api/eventbus-host-v1.md",
+      "review_policy": "behavioral",
+      "stability": "evolving"
     },
     "api/eventbus-v1": {
       "audience": "maintainer",
@@ -786,6 +814,12 @@
       "rel": "docs/api/eventbus-v1.md"
     },
     {
+      "doc_id": "api/eventbus-host-v1",
+      "generator": "scripts/docs/generate.mjs",
+      "name": "eventbus-host-contract",
+      "rel": "docs/api/eventbus-host-v1.md"
+    },
+    {
       "doc_id": "subsystems/fusion",
       "generator": "scripts/docs/generate.mjs",
       "name": "fusion-workflows",
@@ -909,7 +943,7 @@
     "image": "https://raw.githubusercontent.com/ismailsaleekh/pi-background-tasks/main/logo.png",
     "name": "pi-background-tasks",
     "type": "module",
-    "version": "2.6.9"
+    "version": "2.6.10"
   },
   "public_surface_ids": [
     "command:bg",
@@ -923,6 +957,7 @@
     "command:kill",
     "command:logs",
     "command:tasks",
+    "eventbus:background-task-host-v1",
     "eventbus:background-task-v1",
     "renderer:background-task-notification",
     "renderer:fusion-result",
@@ -954,7 +989,7 @@
         "id": "command:bg",
         "kind": "command",
         "name": "bg",
-        "source": "src/extension.ts:750"
+        "source": "src/extension.ts:781"
       },
       {
         "availability": "always",
@@ -963,7 +998,7 @@
         "id": "command:bg-clear",
         "kind": "command",
         "name": "bg-clear",
-        "source": "src/extension.ts:793"
+        "source": "src/extension.ts:824"
       },
       {
         "availability": "always",
@@ -972,7 +1007,7 @@
         "id": "command:bg-tasks",
         "kind": "command",
         "name": "bg-tasks",
-        "source": "src/extension.ts:785"
+        "source": "src/extension.ts:816"
       },
       {
         "availability": "always",
@@ -981,7 +1016,7 @@
         "id": "command:bg-update",
         "kind": "command",
         "name": "bg-update",
-        "source": "src/extension.ts:801"
+        "source": "src/extension.ts:832"
       },
       {
         "availability": "feature:attribution",
@@ -1017,7 +1052,7 @@
         "id": "command:jobs",
         "kind": "command",
         "name": "jobs",
-        "source": "src/extension.ts:850"
+        "source": "src/extension.ts:881"
       },
       {
         "availability": "always",
@@ -1026,7 +1061,7 @@
         "id": "command:kill",
         "kind": "command",
         "name": "kill",
-        "source": "src/extension.ts:894"
+        "source": "src/extension.ts:925"
       },
       {
         "availability": "always",
@@ -1035,7 +1070,7 @@
         "id": "command:logs",
         "kind": "command",
         "name": "logs",
-        "source": "src/extension.ts:863"
+        "source": "src/extension.ts:894"
       },
       {
         "availability": "always",
@@ -1044,10 +1079,36 @@
         "id": "command:tasks",
         "kind": "command",
         "name": "tasks",
-        "source": "src/extension.ts:777"
+        "source": "src/extension.ts:808"
       }
     ],
     "eventbus": [
+      {
+        "availability": "always",
+        "channels": {
+          "changed": "pi-background-tasks:host:changed:v1",
+          "request": "pi-background-tasks:host:request:v1",
+          "response": "pi-background-tasks:host:response:v1"
+        },
+        "default_available": true,
+        "id": "eventbus:background-task-host-v1",
+        "kind": "eventbus",
+        "name": "background-task-host-v1",
+        "operations": [
+          "capabilities",
+          "detail",
+          "list",
+          "logs",
+          "mark_seen",
+          "rerun",
+          "result",
+          "stop",
+          "stop_all",
+          "subscribe",
+          "unsubscribe"
+        ],
+        "source": "src/core/host-protocol.ts"
+      },
       {
         "availability": "always",
         "channels": {
@@ -1076,7 +1137,7 @@
         "id": "renderer:background-task-notification",
         "kind": "renderer",
         "name": "background-task-notification",
-        "source": "src/extension.ts:627"
+        "source": "src/extension.ts:657"
       },
       {
         "availability": "feature:fusion",
@@ -1095,7 +1156,7 @@
         "id": "shortcut:ctrl+alt+b",
         "kind": "shortcut",
         "name": "ctrl+alt+b",
-        "source": "src/extension.ts:834"
+        "source": "src/extension.ts:865"
       },
       {
         "availability": "always",
@@ -1104,7 +1165,7 @@
         "id": "shortcut:ctrl+alt+c",
         "kind": "shortcut",
         "name": "ctrl+alt+c",
-        "source": "src/extension.ts:842"
+        "source": "src/extension.ts:873"
       },
       {
         "availability": "dock:shift+down",
@@ -1113,7 +1174,7 @@
         "id": "shortcut:shift+down",
         "kind": "shortcut",
         "name": "shift+down",
-        "source": "src/extension.ts:825"
+        "source": "src/extension.ts:856"
       }
     ],
     "tool": [
@@ -1230,7 +1291,7 @@
           ],
           "type": "object"
         },
-        "source": "src/extension.ts:1181"
+        "source": "src/extension.ts:1212"
       },
       {
         "availability": "always",
@@ -1266,7 +1327,7 @@
           ],
           "type": "object"
         },
-        "source": "src/extension.ts:1136"
+        "source": "src/extension.ts:1167"
       },
       {
         "availability": "any(feature:delegate,feature:fusion)",
@@ -1361,7 +1422,7 @@
           ],
           "type": "object"
         },
-        "source": "src/extension.ts:927"
+        "source": "src/extension.ts:958"
       },
       {
         "availability": "feature:attested",
@@ -1424,7 +1485,7 @@
           ],
           "type": "object"
         },
-        "source": "src/extension.ts:1036"
+        "source": "src/extension.ts:1067"
       },
       {
         "availability": "always",
@@ -1450,7 +1511,7 @@
           "required": [],
           "type": "object"
         },
-        "source": "src/extension.ts:1105"
+        "source": "src/extension.ts:1136"
       },
       {
         "availability": "feature:fusion",
@@ -1951,6 +2012,15 @@
     "src/core/fusion/workflows.ts": [
       "subsystems/fusion"
     ],
+    "src/core/host-api.ts": [
+      "api/eventbus-host-v1"
+    ],
+    "src/core/host-protocol.ts": [
+      "api/eventbus-host-v1"
+    ],
+    "src/core/host-results.ts": [
+      "api/eventbus-host-v1"
+    ],
     "src/core/lazy-module.ts": [
       "subsystems/delegation"
     ],
@@ -2030,6 +2100,9 @@
     ],
     "command:tasks": [
       "commands/task-manager"
+    ],
+    "eventbus:background-task-host-v1": [
+      "api/eventbus-host-v1"
     ],
     "eventbus:background-task-v1": [
       "api/eventbus-v1"

@@ -308,7 +308,7 @@ export async function evaluateDelegateTerminal(
   return evaluation;
 }
 
-async function adjudicateDelegateTerminal(
+export async function adjudicateDelegateTerminal(
   input: EvaluateDelegateTerminalInput,
 ): Promise<DelegateTerminalEvaluation> {
   const resultPath = join(input.artifactDirAbs, 'result.json');

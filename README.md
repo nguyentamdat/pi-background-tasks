@@ -27,7 +27,7 @@
 | Fact | Value |
 | --- | --- |
 | Package | `pi-background-tasks` |
-| Version | `2.6.9` |
+| Version | `2.6.10` |
 | Node engine | `>=22.19.0` |
 | Pi entrypoints | `./dist/extensions/anthropic-attribution.js`, `./dist/extensions/background-tasks.js` |
 | Package image | [logo.png](https://raw.githubusercontent.com/ismailsaleekh/pi-background-tasks/main/logo.png) |
@@ -40,7 +40,7 @@
 | tool | 11 | 11 |
 | shortcut | 3 | 2 |
 | renderer | 2 | 2 |
-| eventbus | 1 | 1 |
+| eventbus | 2 | 2 |
 | workflow | 4 | 4 |
 
 Public commands: `/bg`, `/bg-clear`, `/bg-tasks`, `/bg-update`, `/claude-cache`, `/fusion`, `/fusion-models`, `/jobs`, `/kill`, `/logs`, `/tasks`.
@@ -360,6 +360,8 @@ Other Pi extensions can control the same `BackgroundTaskRegistry` through Pi's `
 | Terminal task event | `pi-background-tasks:terminal:v1` |
 
 Operations are `capabilities`, `run`, `status`, `logs`, and `kill`. This is the integration point for orchestrators such as Autopilot that need non-blocking package-managed work with bounded logs and correlated terminal events. Consumers must deduplicate terminal frames by `task.id`: an EventBus listener failure can cause a retried publication.
+
+Native front ends that show a background-jobs panel can use the separate, optional [host interface EventBus API v1](docs/api/eventbus-host-v1.md) (`pi-background-tasks:host:request:v1`, `pi-background-tasks:host:response:v1`, `pi-background-tasks:host:changed:v1`). It adds leased, sequence-fenced, paginated list/detail, bounded UTF-8-safe log windows, exact-id stop/confirmed stop-all, shell-only rerun, read-only verified delegate/Fusion result views that never claim usage, shared seen state, and coalesced change frames over the same registry. It changes nothing in the v1 service, tools, commands, dock, notifications, or wake-up behavior, and does no change-publication work while no client is subscribed.
 
 ## Documentation map
 

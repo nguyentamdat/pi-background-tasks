@@ -43,6 +43,7 @@ Generated navigation for every package-local documentation page. This index inte
 
 | Doc | Mode | Review | Stability |
 | --- | --- | --- | --- |
+| [api/eventbus-host-v1](./api/eventbus-host-v1.md) | mixed | behavioral | evolving |
 | [api/eventbus-v1](./api/eventbus-v1.md) | mixed | behavioral | evolving |
 | [operations/configuration](./operations/configuration.md) | authored | contract | stable |
 | [operations/releasing](./operations/releasing.md) | authored | contract | evolving |
@@ -79,7 +80,7 @@ Generated navigation for every package-local documentation page. This index inte
 
 ## Docs by category
 
-- **api**: [api/eventbus-v1](./api/eventbus-v1.md)
+- **api**: [api/eventbus-host-v1](./api/eventbus-host-v1.md), [api/eventbus-v1](./api/eventbus-v1.md)
 - **commands**: [commands/bg](./commands/bg.md), [commands/bg-clear](./commands/bg-clear.md), [commands/bg-update](./commands/bg-update.md), [commands/claude-cache](./commands/claude-cache.md), [commands/fusion](./commands/fusion.md), [commands/fusion-models](./commands/fusion-models.md), [commands/jobs](./commands/jobs.md), [commands/kill](./commands/kill.md), [commands/logs](./commands/logs.md), [commands/task-manager](./commands/task-manager.md)
 - **concepts**: [concepts/completion-delivery](./concepts/completion-delivery.md), [concepts/context-projection-and-budgeting](./concepts/context-projection-and-budgeting.md)
 - **operations**: [operations/configuration](./operations/configuration.md), [operations/releasing](./operations/releasing.md), [operations/testing](./operations/testing.md), [operations/troubleshooting](./operations/troubleshooting.md)
@@ -103,6 +104,7 @@ Generated navigation for every package-local documentation page. This index inte
 | `command:kill` | [commands/kill](./commands/kill.md) |
 | `command:logs` | [commands/logs](./commands/logs.md) |
 | `command:tasks` | [commands/task-manager](./commands/task-manager.md) |
+| `eventbus:background-task-host-v1` | [api/eventbus-host-v1](./api/eventbus-host-v1.md) |
 | `eventbus:background-task-v1` | [api/eventbus-v1](./api/eventbus-v1.md) |
 | `renderer:background-task-notification` | [concepts/completion-delivery](./concepts/completion-delivery.md) |
 | `renderer:fusion-result` | [subsystems/fusion](./subsystems/fusion.md) |
@@ -129,33 +131,34 @@ Generated navigation for every package-local documentation page. This index inte
 
 | Kind | Name | ID | Availability | Default | Provenance |
 | --- | --- | --- | --- | --- | --- |
-| command | `bg` | `command:bg` | `always` | yes | `src/extension.ts:750` |
-| command | `bg-clear` | `command:bg-clear` | `always` | yes | `src/extension.ts:793` |
-| command | `bg-tasks` | `command:bg-tasks` | `always` | yes | `src/extension.ts:785` |
-| command | `bg-update` | `command:bg-update` | `always` | yes | `src/extension.ts:801` |
+| command | `bg` | `command:bg` | `always` | yes | `src/extension.ts:781` |
+| command | `bg-clear` | `command:bg-clear` | `always` | yes | `src/extension.ts:824` |
+| command | `bg-tasks` | `command:bg-tasks` | `always` | yes | `src/extension.ts:816` |
+| command | `bg-update` | `command:bg-update` | `always` | yes | `src/extension.ts:832` |
 | command | `claude-cache` | `command:claude-cache` | `feature:attribution` | yes | `src/core/anthropic-attribution.ts:3599` |
 | command | `fusion` | `command:fusion` | `feature:fusion` | yes | `src/fusion-extension.ts:1083` |
 | command | `fusion-models` | `command:fusion-models` | `feature:fusion` | yes | `src/fusion-extension.ts:1123` |
-| command | `jobs` | `command:jobs` | `always` | yes | `src/extension.ts:850` |
-| command | `kill` | `command:kill` | `always` | yes | `src/extension.ts:894` |
-| command | `logs` | `command:logs` | `always` | yes | `src/extension.ts:863` |
-| command | `tasks` | `command:tasks` | `always` | yes | `src/extension.ts:777` |
+| command | `jobs` | `command:jobs` | `always` | yes | `src/extension.ts:881` |
+| command | `kill` | `command:kill` | `always` | yes | `src/extension.ts:925` |
+| command | `logs` | `command:logs` | `always` | yes | `src/extension.ts:894` |
+| command | `tasks` | `command:tasks` | `always` | yes | `src/extension.ts:808` |
 | tool | `bg_delegate` | `tool:bg_delegate` | `feature:delegate` | yes | `src/delegate-extension.ts:500` |
-| tool | `bg_kill` | `tool:bg_kill` | `always` | yes | `src/extension.ts:1181` |
-| tool | `bg_logs` | `tool:bg_logs` | `always` | yes | `src/extension.ts:1136` |
+| tool | `bg_kill` | `tool:bg_kill` | `always` | yes | `src/extension.ts:1212` |
+| tool | `bg_logs` | `tool:bg_logs` | `always` | yes | `src/extension.ts:1167` |
 | tool | `bg_result` | `tool:bg_result` | `any(feature:delegate,feature:fusion)` | yes | `src/delegate-extension.ts:757` |
-| tool | `bg_run` | `tool:bg_run` | `always` | yes | `src/extension.ts:927` |
-| tool | `bg_run_pi_attested` | `tool:bg_run_pi_attested` | `feature:attested` | yes | `src/extension.ts:1036` |
-| tool | `bg_status` | `tool:bg_status` | `always` | yes | `src/extension.ts:1105` |
+| tool | `bg_run` | `tool:bg_run` | `always` | yes | `src/extension.ts:958` |
+| tool | `bg_run_pi_attested` | `tool:bg_run_pi_attested` | `feature:attested` | yes | `src/extension.ts:1067` |
+| tool | `bg_status` | `tool:bg_status` | `always` | yes | `src/extension.ts:1136` |
 | tool | `fusion_investigate` | `tool:fusion_investigate` | `feature:fusion` | yes | `src/fusion-extension.ts:1305` |
 | tool | `fusion_reason` | `tool:fusion_reason` | `feature:fusion` | yes | `src/fusion-extension.ts:1287` |
 | tool | `fusion_research` | `tool:fusion_research` | `feature:fusion` | yes | `src/fusion-extension.ts:1324` |
 | tool | `fusion_validate` | `tool:fusion_validate` | `feature:fusion` | yes | `src/fusion-extension.ts:1344` |
-| shortcut | `ctrl+alt+b` | `shortcut:ctrl+alt+b` | `dock:ctrl+alt+b` | no | `src/extension.ts:834` |
-| shortcut | `ctrl+alt+c` | `shortcut:ctrl+alt+c` | `always` | yes | `src/extension.ts:842` |
-| shortcut | `shift+down` | `shortcut:shift+down` | `dock:shift+down` | yes | `src/extension.ts:825` |
-| renderer | `background-task-notification` | `renderer:background-task-notification` | `always` | yes | `src/extension.ts:627` |
+| shortcut | `ctrl+alt+b` | `shortcut:ctrl+alt+b` | `dock:ctrl+alt+b` | no | `src/extension.ts:865` |
+| shortcut | `ctrl+alt+c` | `shortcut:ctrl+alt+c` | `always` | yes | `src/extension.ts:873` |
+| shortcut | `shift+down` | `shortcut:shift+down` | `dock:shift+down` | yes | `src/extension.ts:856` |
+| renderer | `background-task-notification` | `renderer:background-task-notification` | `always` | yes | `src/extension.ts:657` |
 | renderer | `fusion-result` | `renderer:fusion-result` | `feature:fusion` | yes | `src/fusion-extension.ts:1067` |
+| eventbus | `background-task-host-v1` | `eventbus:background-task-host-v1` | `always` | yes | `src/core/host-protocol.ts` |
 | eventbus | `background-task-v1` | `eventbus:background-task-v1` | `always` | yes | `src/core/extension-api.ts` |
 | workflow | `investigate` | `workflow:investigate` | `feature:fusion` | yes | `src/core/fusion/workflows.ts:80` |
 | workflow | `reason` | `workflow:reason` | `feature:fusion` | yes | `src/core/fusion/workflows.ts:61` |

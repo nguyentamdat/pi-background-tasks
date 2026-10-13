@@ -33,6 +33,8 @@ The design deliberately separates:
 - parent adjudication (`outcome.json`),
 - user retrieval (`bg_result`).
 
+`src/core/delegate/runner.ts` exports the pure `adjudicateDelegateTerminal` boundary used by `evaluateDelegateTerminal`. The wrapper still records the parent adjudication in `outcome.json` exactly as before; the pure boundary performs the same result-package verification without any write, and is what the optional [host interface](../api/eventbus-host-v1.md) uses for read-only result views, so UI inspection never rewrites `outcome.json`.
+
 ## Lazy facade activation
 
 Enabled schemas, descriptions, argument preparation, renderers, and tool registration are immediate. Delegate launch/seed/budget/runner code is imported only on the first valid `bg_delegate` execution. `bg_result` has independent delegate and Fusion verifier loaders and selects one only after task facts identify the producer; a running result imports neither verifier.

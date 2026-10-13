@@ -53,6 +53,10 @@ import {
   installBackgroundTaskExtensionApi,
   type BackgroundTaskExtensionService,
 } from './core/extension-api.js';
+import {
+  installBackgroundTaskHostApi,
+  type BackgroundTaskHostService,
+} from './core/host-api.js';
 import type { BackgroundTaskForUi, TaskManagerResult } from './ui/background-tasks-manager.js';
 import { dockShortcutFooterHint, parseBackgroundTasksConfig } from './core/config.js';
 import { LazyModule, SynchronousActivationCloseFence } from './core/lazy-module.js';
@@ -244,6 +248,10 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
     'background-task-manager',
     () => import('./ui/background-tasks-manager.js'),
   );
+  const hostResultLoader = new LazyModule(
+    'host-result-reader',
+    () => import('./core/host-results.js'),
+  );
 
   const registryContext = (ctx: ExtensionContext): BackgroundTaskContext => ({
     cwd: ctx.cwd,
@@ -255,6 +263,7 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
   const registry = new BackgroundTaskRegistry({
     onChange: () => {
       updateUi();
+      hostService.invalidate();
     },
     sendCompletionNotification: (message, options) => {
       pi.sendMessage(message, options);
@@ -270,6 +279,18 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
     registry,
     getContext: () => currentRegistryCtx,
     isShuttingDown: () => registry.isShuttingDown(),
+  });
+  const hostService: BackgroundTaskHostService = installBackgroundTaskHostApi({
+    events: pi.events,
+    registry,
+    getContext: () => currentRegistryCtx,
+    isSeen: (taskId) => seenTaskIds.has(taskId),
+    markSeen: (taskIds) => {
+      for (const taskId of taskIds) seenTaskIds.add(taskId);
+      updateUi();
+      hostService.invalidate();
+    },
+    readResult: (task) => hostResultLoader.run((runtime) => runtime.readHostTaskResult(task)),
   });
 
   const beginSessionShutdown = (reason: string): void => {
@@ -305,6 +326,7 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
       }
       registry.setShuttingDown(true);
       eventService.close();
+      hostService.close();
     }
     // Teardown remains active on repeated calls so even a handle assigned by a
     // racing continuation is still disposed rather than hidden by idempotence.
@@ -326,6 +348,9 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
   });
   activationCloseFence.add(() => {
     taskManagerLoader.close('session shutdown');
+  });
+  activationCloseFence.add(() => {
+    hostResultLoader.close('session shutdown');
   });
   pi.on('session_shutdown', (event) => {
     shutdownReason = event.reason;
@@ -354,6 +379,7 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
       }
       currentCtx = ctx;
       currentRegistryCtx = nextRegistryCtx;
+      hostService.markReady();
       return;
     }
     const activationNonce = randomBytes(16).toString('hex');
@@ -385,6 +411,7 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
       activationIdentity = identity;
       currentCtx = ctx;
       currentRegistryCtx = nextRegistryCtx;
+      hostService.markReady();
     } catch (error) {
       registry.abortReloadActivation(claim);
       if (pendingActivationClaim === claim) pendingActivationClaim = undefined;
@@ -453,6 +480,7 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
     const unseen = unseenFinishedTasks();
     for (const task of unseen) seenTaskIds.add(task.id);
     updateUi(ctx);
+    if (unseen.length > 0) hostService.invalidate();
     return unseen.length;
   }
 
@@ -593,10 +621,12 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
             markSeen: (taskId: string) => {
               seenTaskIds.add(taskId);
               updateUi(ctx);
+              hostService.invalidate();
             },
             markFinishedSeen: (taskIds: string[]) => {
               for (const taskId of taskIds) seenTaskIds.add(taskId);
               updateUi(ctx);
+              hostService.invalidate();
             },
             isSeen: (taskId: string) => seenTaskIds.has(taskId),
           };
@@ -683,6 +713,7 @@ export default async function backgroundTasksExtension(pi: ExtensionAPI): Promis
     await registry.ensureRuntimeDir(nextRegistryCtx);
     if (disposed) return;
     updateUi(ctx);
+    hostService.markReady();
     if (disposed) return;
     if (statusInterval !== undefined) clearInterval(statusInterval);
     if (disposed) return;
